@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, UrlTile } from 'react-native-maps';
 import axios from 'axios';
 
 const { width, height } = Dimensions.get('window');
@@ -26,12 +26,11 @@ const formatDate = (date: Date) => {
   return `${d}/${m}/${y}`;
 };
 
-// Formato hora con AM/PM
 const formatTime12h = (date: Date) => {
   let hours = date.getHours();
   const minutes = date.getMinutes().toString().padStart(2, '0');
   const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12; // convierte 0 a 12
+  hours = hours % 12 || 12;
   return `${hours}:${minutes} ${ampm}`;
 };
 
@@ -56,7 +55,6 @@ export default function Home() {
         const loc = await Location.getCurrentPositionAsync({});
         setLocation(loc);
 
-        // Reverse geocoding para municipio y estado
         const places = await Location.reverseGeocodeAsync({
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
@@ -116,10 +114,8 @@ export default function Home() {
             <Text style={styles.title}>AvoTex 🥑</Text>
           </Animated.View>
 
-          {/* MUNICIPIO Y ESTADO */}
           {municipioEstado.length > 0 && (
             <Text style={styles.municipioEstado}>📍{municipioEstado} {dateTime.time} {dateTime.date}</Text>
-            
           )}
 
           <Animated.View entering={FadeInDown.delay(400).duration(1000)} style={styles.statsContainer}>
@@ -140,7 +136,7 @@ export default function Home() {
             <View style={styles.statCard}>
               <Leaf color="#50c878" size={24} />
               <Text style={{ fontSize: 11, fontFamily: 'Poppins_600SemiBold' }}>
-              Huerta sin escanear
+                Huerta sin escanear
               </Text>
               <Text style={styles.statLabel}>Salud</Text>
             </View>
@@ -156,6 +152,12 @@ export default function Home() {
                 longitudeDelta: 0.005,
               }}
             >
+              {/* OpenStreetMap tiles */}
+              <UrlTile
+                urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maximumZ={19}
+                flipY={false}
+              />
               <Marker
                 coordinate={{
                   latitude: location.coords.latitude,
@@ -253,7 +255,6 @@ const styles = StyleSheet.create({
   statCard: {
     alignItems: 'center',
     flex: 1,
-
   },
   statValue: {
     fontSize: 16,
@@ -265,16 +266,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Poppins_400Regular',
     color: '#666',
-  },
-  dateTimeContainer: {
-    width: '100%',
-    marginTop: 6,
-    alignItems: 'center',
-  },
-  dateTimeText: {
-    fontSize: 14,
-    fontFamily: 'Poppins_600SemiBold',
-    color: '#2a2a2a',
   },
   grid: {
     flexDirection: 'row',
